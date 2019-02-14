@@ -51,7 +51,7 @@ def session_producer():
         user_sessions = {}
         curr_time = None
         # read the csvfile line by line and parsing each line of data into
-        # fields
+        # a session object
         for line in rest_lines:
             fields = line.split(',')
             ip = fields[ip_index]
@@ -60,13 +60,8 @@ def session_producer():
             cik = fields[cik_index]
             timestamp = datetime.strptime((date + '' + time).strip(' '
                     ), '%Y-%m-%d%H:%M:%S')
-            if ip in user_sessions.keys():
-                user_sessions[ip].update_active_time(timestamp)
-                user_sessions[ip].update_doc_num(1)
-            else:
-                new_session = userSession(ip, timestamp, timestamp, 1)
-                user_sessions[ip] = new_session
-
+            #check all the seesions in the map once time reflected,detact the end
+            #session and pop it to ouput file
             if curr_time is None or timestamp > curr_time:
                 curr_time = timestamp
                 print curr_time
@@ -77,20 +72,33 @@ def session_producer():
 
                         line = ','.join([end_session.user_ip,
                                 datetime.strftime(end_session.start_tm,
-                                '%Y-%m-%d%H:%M:%S'),
+                                '%Y-%m-%d %H:%M:%S'),
                                 datetime.strftime(end_session.latest_active_tm,
-                                '%Y-%m-%d%H:%M:%S'),
+                                '%Y-%m-%d %H:%M:%S'),
                                 str(end_session.session_duration()),
                                 str(end_session.doc_num)])
                         output_file.write(line + '\n')
 
+            #processing the curr line and check with user_sessions for insert or update
+            if ip in user_sessions.keys():
+                user_sessions[ip].update_active_time(timestamp)
+                user_sessions[ip].update_doc_num(1)
+            else:
+                new_session = userSession(ip, timestamp, timestamp, 1)
+                print(new_session.user_ip)
+                user_sessions[ip] = new_session
+
+
+        print(list(user_sessions))
+        for i in user_sessions.keys():
+            print(i)
         for i in user_sessions.values():
             print (i.user_ip, i.start_tm, i.latest_active_tm,
                    i.session_duration(), i.doc_num)
             line = ','.join([i.user_ip, datetime.strftime(i.start_tm,
-                            '%Y-%m-%d%H:%M:%S'),
+                            '%Y-%m-%d %H:%M:%S'),
                             datetime.strftime(i.latest_active_tm,
-                            '%Y-%m-%d%H:%M:%S'),
+                            '%Y-%m-%d %H:%M:%S'),
                             str(i.session_duration()), str(i.doc_num)])
             output_file.write(line + '\n')
 
