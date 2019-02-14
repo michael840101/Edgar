@@ -24,5 +24,31 @@ While reading through the input log line by line , keep updating the sessions in
 Once the input time changed, check the session in user_sessions, pop up the expired
 session and write the info into output_file
 
+# Repository structure
+
+├── README.md
+├── run.sh
+├── src
+│   └── sessionization.py
+├── input
+│   └── inactivity_period.txt
+│   └── log.csv
+├── output
+|   └── sessionization.txt
+├── insight_testsuite
+    └── run_tests.sh
+    └── tests
+        └── test_1
+        |   ├── input
+        |   │   └── inactivity_period.txt
+        |   │   └── log.csv
+        |   |__ output
+        |   │   └── sessionization.txt
+        ├── your-own-test_1
+            ├── input
+            │   └── my-initial-inputs
+            |── output
+                └── sessionization.txt
+
 #Instruction to run the project
 Just run the run.sh script in the project directory with desired input file in the input folder.
