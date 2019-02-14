@@ -1,6 +1,4 @@
 
-
-
 # Project Abstract
 
 
@@ -15,6 +13,16 @@ The program  expect two input files (be sure to read the section, "Repo director
 * `inactivity_period.txt`: Holds a single value denoting the period of inactivity that should be used to identify when a user session is over
 
 As it process the EDGAR weblogs line by line, the moment the program detect a user session has ended, your program should write a line to an output file, `sessionization.txt`, listing the IP address, duration of the session and number of documents accessed.
+
+#My Solution
+Create a session object to manage the user, start time, last active time and documents accessing during the session
+
+Keep all active sessions in a map data structure(user_sessions) with user(ip)  as key
+
+While reading through the input log line by line , keep updating the sessions in map
+
+Once the input time changed, check the session in user_sessions, pop up the expired
+session and write the info into output_file
 
 #Instruction to run the project
 Just run the run.sh script in the project directory with desired input file in the input folder.
