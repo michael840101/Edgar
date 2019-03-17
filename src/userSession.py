@@ -1,7 +1,9 @@
+"""
+The user session class for the sessionization to manage the sessoin
+for the new start time
+"""
 from datetime import datetime
 
-# create the user session class for the sessionization to manage the sessoin 
-# for the new start time
 class userSession(object):
 
     def __init__(self):

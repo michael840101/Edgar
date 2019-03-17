@@ -17,9 +17,9 @@ As it process the EDGAR weblogs line by line, the moment the program detect a us
 # My Solution
 Create a session object to manage the user, start time, last active time and documents accessing during the session
 
-Keep all active sessions in a map data structure(user_sessions) with user(ip)  as key
+Keep all active sessions in a dictionary data structure(user_sessions) with user(ip)  as key
 
-While reading through the input log line by line , keep updating the sessions in map
+While reading through the input log line by line , keep updating the sessions in directory
 
 Once the input time changed, check the session in user_sessions, pop up the expired
 session and write the info into output_file
