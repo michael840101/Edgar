@@ -1,5 +1,8 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+"""
+The sessionization functiones that produce the new csv file tracking
+how long a particular user spends on EDGAR during a visit and
+how many documents that user requested during the session
+"""
 import sys
 from io import open as ioopen
 from datetime import datetime
@@ -8,59 +11,43 @@ from userSession import userSession
 
 # Main function to write the sesseionization info to output file
 
-def session_producer():
+def session_producer(input_log_file, input_inactivity_file, output_file_uri):
+    """
+    The function that take the input log file and input inactive_interval file location
+    to caculate the time spends and file requested per user session
+    and write the result into output file location
+    :type input_log_file: string
+    :type input_inactivity_file: string
+    :type output_file_uri: string
 
-    # take the sys arguments as the input and output file path and names
-
-    input_log_file = sys.argv[1]
-    input_inactivity_file = sys.argv[2]
-    output_file_uri = sys.argv[3]
-
+    :rtype :
+    """
+    # read the csvfile first line and parsing header info for each of fields
+    fields_idx=header_parser(input_log_file)
+    #open the output file for writing output
     output_file = open(output_file_uri, 'w')
+
+    #read the idle_interval parameter from input_inactivity_file
     with open(input_inactivity_file,'r') as interval:
         inactive_interval=int(interval.read()[0])
 
+    # read the csvfile line by line and parsing each line of data into
+    # a session object
     with ioopen(input_log_file, encoding='utf-8') as csvfile:
-
-        # read the csvfile first line and parsing header info for each of fields
-
         lines = csvfile.readlines()
-        field_index = lines[0].split(',')
-
-        for i in field_index:
-            if 'ip' in i:
-                ip_index = field_index.index(i)
-                print ip_index
-            if 'date' in i:
-                date_index = field_index.index(i)
-                print date_index
-            if 'time' in i:
-                time_index = field_index.index(i)
-                print time_index
-            if 'cik' in i:
-                cik_index = field_index.index(i)
-                print cik_index
-            if 'accession' in i:
-                accession_index = field_index.index(i)
-                print accession_index
-            if 'extention' in i:
-                extention_index = field_index.index(i)
-                print extention_index
-
         rest_lines = lines[1:]
         user_sessions = {}
         curr_time = None
-        # read the csvfile line by line and parsing each line of data into
-        # a session object
+
         for line in rest_lines:
             fields = line.split(',')
-            ip = fields[ip_index]
-            date = fields[date_index]
-            time = fields[time_index]
-            cik = fields[cik_index]
+            ip = fields[fields_idx[ip_index]]
+            date = fields[fields_idx[date_index]]
+            time = fields[fields_idx[time_index]]
+            cik = fields[fields_idx[cik_index]]
             timestamp = datetime.strptime((date + '' + time).strip(' '
                     ), '%Y-%m-%d%H:%M:%S')
-            #check all the seesions in the map once time reflected,detact the end
+            #first check all the seesions in the dictionary once time reflected,detact the end
             #session and pop it to ouput file
             if curr_time is None or timestamp > curr_time:
                 curr_time = timestamp
@@ -88,13 +75,7 @@ def session_producer():
                 print(new_session.user_ip)
                 user_sessions[ip] = new_session
 
-
-        print(list(user_sessions))
-        for i in user_sessions.keys():
-            print(i)
-        for i in user_sessions.values():
-            print (i.user_ip, i.start_tm, i.latest_active_tm,
-                   i.session_duration(), i.doc_num)
+            #append the rest of the remaining sessoins into the output file once reach the last line
             line = ','.join([i.user_ip, datetime.strftime(i.start_tm,
                             '%Y-%m-%d %H:%M:%S'),
                             datetime.strftime(i.latest_active_tm,
@@ -106,7 +87,41 @@ def session_producer():
     output_file.close()
 
 
-# run the analysis function if the file been triggered directly
+def header_parser(input_log_file):
+    """
+    The function parsing the header of csv file and
+    return the dictionary of field as key and index of field as value
+    :type input_log_file: string
+    :rtype fields: dictionary
+    """
+    fields={}
+    with ioopen(input_log_file, encoding='utf-8') as csvfile:
 
+        line_1 = csvfile.readline()
+        field_index = line_1.split(',')
+
+        for i in field_index:
+            if 'ip' in i:
+                fields[ip_index] = field_index.index(i)
+            if 'date' in i:
+                fields[date_index] = field_index.index(i)
+            if 'time' in i:
+                fields[time_index] = field_index.index(i)
+            if 'cik' in i:
+                fields[cik_index] = field_index.index(i)
+            if 'accession' in i:
+                fields[accession_index] = field_index.index(i)
+            if 'extention' in i:
+                fields[extention_index] = field_index.index(i)
+
+    return fields
+
+# run the analysis function if the file been triggered directly
 if __name__ == '__main__':
-    session_producer()
+
+    # take the sys arguments as the input and output file path and names
+    input_log_file = sys.argv[1]
+    input_inactivity_file = sys.argv[2]
+    output_file_uri = sys.argv[3]
+    # run the session producer function
+    session_producer(input_log_file, input_inactivity_file, output_file_uri)
